@@ -2,7 +2,7 @@
 Lilliputian is an interpreted psuedo-assembly language that is written in C++. While it is not a true assembly language, it mimics the behavior of actual assemblies. The name "Lilliputian" comes from the 1726 novel Gulliver's Travels by Jonathan Swift. The word lilliputian has become an adjective meaning "very small in size", which is fitting to this assembly language as it was not meant to have the full capabillities of an x86 or NASM assembler.
 
 <h2>Downloads</h2>
-Lilliputian can be ran as a standalone ZIP folder. Go to: https://github.com/bootsareme/Lilliputian/releases/download/1.0/lilli_devkit-v1.0release.zip. Your browser will probably warn you that it is a virus but don't fret, the source code is for you to judge. You can also view code snippets inside the "Snippets" folder for examples of Lilliputian assembly code. If the .exe file prints nothing, you might be missing some C++ redistributable frameworks. Download the latest ones here: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads.
+Lilliputian can be ran as a standalone executable. Your browser will probably warn you that it is a virus but don't fret, the source code is for you to judge. You can also view code snippets inside the "Snippets" folder for examples of Lilliputian assembly code. If the .exe file prints nothing, you might be missing some C++ redistributable frameworks. Download the latest ones here: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads.
 
 <h2>Background</h2>
 Lilliputian programs take on the file extension of (.lp). They can be executed through a CLI by running this command:
