@@ -1,16 +1,16 @@
-# Lilliputain Assembly Language (LILLI)
-Lilliputain is an interpreted psuedo-assembly language that is written in C++. While it is not a true assembly language, it mimics the behavior of actual assemblies. The name "Lilliputain" comes from the 1726 novel Gulliver's Travels by Jonathan Swift. The word lilliputian has become an adjective meaning "very small in size", which is fitting to this assembly language as it was not meant to have the full capabillities of an x86 or NASM assembler.
+# Lilliputian Assembly Language (LILLI)
+Lilliputian is an interpreted psuedo-assembly language that is written in C++. While it is not a true assembly language, it mimics the behavior of actual assemblies. The name "Lilliputian" comes from the 1726 novel Gulliver's Travels by Jonathan Swift. The word lilliputian has become an adjective meaning "very small in size", which is fitting to this assembly language as it was not meant to have the full capabillities of an x86 or NASM assembler.
 
 <h2>Downloads</h2>
-Lilliputain can be ran as a standalone ZIP folder. Go to: https://github.com/bootsareme/Lilliputain/releases/download/1.0/lilli_devkit-v1.0release.zip. Your browser will probably warn you that it is a virus but don't fret, the source code is for you to judge. You can also view code snippets inside the "Snippets" folder for examples of Lilliputain assembly code. If the .exe file prints nothing, you might be missing some C++ redistributable frameworks. Download the latest ones here: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads.
+Lilliputian can be ran as a standalone ZIP folder. Go to: https://github.com/bootsareme/Lilliputian/releases/download/1.0/lilli_devkit-v1.0release.zip. Your browser will probably warn you that it is a virus but don't fret, the source code is for you to judge. You can also view code snippets inside the "Snippets" folder for examples of Lilliputian assembly code. If the .exe file prints nothing, you might be missing some C++ redistributable frameworks. Download the latest ones here: https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads.
 
 <h2>Background</h2>
-Lilliputain programs take on the file extension of (.lp). They can be executed through a CLI by running this command:
+Lilliputian programs take on the file extension of (.lp). They can be executed through a CLI by running this command:
 
 ```
 lilli -r program.lp
 ```
-An instruction in Lilliputain is takes on the form of one single line. It may look something like this:
+An instruction in Lilliputian is takes on the form of one single line. It may look something like this:
 
 ```
 MOV X -> STDOUT
@@ -22,10 +22,10 @@ MOV - Opcode: The command that modifies the arguments.
 X and STDOUT - Operands: The parameters of the opcodes.
 "->" - Operator: Helps the opcode bind two operands together.
 ```
-The default variable type is an integer. Strings do not exist in Lilliputain and must be converted to an ASCII value through STR. STRs are variable types that specialize in representing strings. Using the STR opcode implies that the operand on the right side have already-defined integer variables. There is an internal variable, STDOUT (it must be in ALL-CAPS), that represents the output stream of the program. It is used to prlong long STRs (PRINT X -> STDOUT) or integer values (MOV X -> STDOUT). Using the "PRINT" or "MOV" function for a STR will automatically create a newline for each iteration when "PRINT" or "MOV" is called.
+The default variable type is an integer. Strings do not exist in Lilliputian and must be converted to an ASCII value through STR. STRs are variable types that specialize in representing strings. Using the STR opcode implies that the operand on the right side have already-defined integer variables. There is an internal variable, STDOUT (it must be in ALL-CAPS), that represents the output stream of the program. It is used to prlong long STRs (PRINT X -> STDOUT) or integer values (MOV X -> STDOUT). Using the "PRINT" or "MOV" function for a STR will automatically create a newline for each iteration when "PRINT" or "MOV" is called.
 
 <h2>Control Flow</h2>
-Lilliputain supports IF statements and their behavior is very simple. The number proceeding immediately after the CHECK opcode displays how many lines after the original statement the IF statement should consider for. If the condition is not met, skip past the specified amount of lines MINUS ITSELF AS A LINE. Note the spaces between each segment. When using CHECK statements, both variables have to be a single character, comparing mutiple words (foo<=baz) is not allowed, instead use (f<=b). 
+Lilliputian supports IF statements and their behavior is very simple. The number proceeding immediately after the CHECK opcode displays how many lines after the original statement the IF statement should consider for. If the condition is not met, skip past the specified amount of lines MINUS ITSELF AS A LINE. Note the spaces between each segment. When using CHECK statements, both variables have to be a single character, comparing mutiple words (foo<=baz) is not allowed, instead use (f<=b). 
 
 ```
 CHECK 5 x=y // Equal to; Next 5 statements, inside IF block.
@@ -59,7 +59,7 @@ Another opcode, INT, interrupts the thread for the specified amount of milliseco
 ```
 INT 1000
 ```
-That is it for now, although Lilliputain is far from finished. Please report any bugs you find in the "Issues" section and the most upvoted one will be prioritized to be fixed first. Check out the bottom table for a list of Opcodes.
+That is it for now, although Lilliputian is far from finished. Please report any bugs you find in the "Issues" section and the most upvoted one will be prioritized to be fixed first. Check out the bottom table for a list of Opcodes.
 
 <h2>Opcodes</h2>
 
