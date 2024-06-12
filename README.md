@@ -8,21 +8,21 @@ Lilliputian can be ran as a standalone executable. Your browser will probably wa
 Lilliputian programs take on the file extension of (.lp). They can be executed through a CLI by running this command:
 
 ```
-lilli -r program.lp
+lilli program.lp
 ```
 An instruction in Lilliputian is takes on the form of one single line. It may look something like this:
 
 ```
-MOV X -> STDOUT
+MOV x -> STDOUT
 ```
 Within an instruction statement, there are 4 parts (all separated by spaces).
 
 ```
 MOV - Opcode: The command that modifies the arguments.
-X and STDOUT - Operands: The parameters of the opcodes.
+x and STDOUT - Operands: The parameters of the opcodes.
 "->" - Operator: Helps the opcode bind two operands together.
 ```
-The default variable type is an integer. Strings do not exist in Lilliputian and must be converted to an ASCII value through STR. STRs are variable types that specialize in representing strings. Using the STR opcode implies that the operand on the right side have already-defined integer variables. There is an internal variable, STDOUT (it must be in ALL-CAPS), that represents the output stream of the program. It is used to print long STRs (PRINT X -> STDOUT) or integer values (MOV X -> STDOUT). Using the "PRINT" or "MOV" function for a STR will automatically create a newline for each iteration when "PRINT" or "MOV" is called.
+The SETault variable type is an integer. Strings do not exist in Lilliputian and must be converted to an ASCII value through STR. STRs are variable types that specialize in representing strings. Using the STR opcode implies that the operand on the right side have already-SETined integer variables. There are two reserved variables, STDIN and STDOUT (it must be in ALL-CAPS), that represents the input and output streams of the program, respectively. It is used to print long strings (MOV x -> STDOUT) or take user input (MOV STDIN -> x). Using the "MOV" function for a string will automatically create a newline for each iteration when "MOV" is called.
 
 <h2>Control Flow</h2>
 Lilliputian supports IF statements and their behavior is very simple. The number proceeding immediately after the CHECK opcode displays how many lines after the original statement the IF statement should consider for. If the condition is not met, skip past the specified amount of lines MINUS ITSELF AS A LINE. Note the spaces between each segment. When using CHECK statements, both variables have to be a single character, comparing mutiple words (foo<=baz) is not allowed, instead use (f<=b). 
@@ -36,14 +36,14 @@ Jump statements are also included in the language and it only has one operand th
 
 ```
 JMP 123 - Jumps to lines 123.
-JMP X - Jumps to value stored in X.
+JMP x - Jumps to value stored in x.
 ```
 This can be used in conjunction with CHECK statements to create while or for loops. Here is a simple for loop statement that prints the integers from 1 to 10.
 
 ```
-SET i = 1
-SET a = 10
-SET m = 0
+SET i := 1
+SET a := 10
+SET m := 0
 ARITH i + m
 MOV m -> STDOUT
 CHECK 2 a!=m
@@ -65,14 +65,13 @@ That is it for now, although Lilliputian is far from finished. Please report any
 
 | Opcode | Description |
 | --- | --- |
-| SET X = Y | Creates a new variable called X and assigns it to Y. |
-| MOV X -> Y | Moves the value of X into Y. |
-| ARITH X ± Y | Performs arithmetic on X and Y and saves the results to Y. (+, -, ×, ÷) |
-| STR X = Y,Z | Creates a STR X and joins the ASCII values of Y and Z. |
-| PRINT X -> Y | Prints STR X into filename Y. |
-| CHECK 123 X=Y | If condition is met, run the next 123 lines and return back to main thread. Otherwise skip the next 123 lines. |
-| JMP 123/X | Jumps to line number 123/(value @ X). CAUTION: If left unhandled, it may cause infinite loops. |
-| DEL X | Deletes the variable X from scope entirely. |
+| SET x := y | Sets variable called x the value of y. |
+| MOV x -> y | Moves the value of x into y. |
+| ARITH x ± y | Performs arithmetic on x and y and saves the results to y. (+, -, ×, ÷) |
+| STR x = y,z | Creates a string x and joins the ASCII values of y and z. |
+| CHECK 123 x=y | If condition is met, run the next 123 lines and return back to main thread. Otherwise skip the next 123 lines. |
+| JMP 123/x | Jumps to line number 123/(value @ x). CAUTION: If left unhandled, it may cause infinite loops. |
+| DEL x | Deletes the variable x from scope entirely. |
 | INT 1234 | Pauses the thread for 1234 ms (milliseconds). |
 
 
@@ -81,5 +80,5 @@ While not required, some conventions are put in place to simplify workflow. The 
 
 * All user-defined variables shall be in lowercase.
 * Built-in functions and variables should be in ALL-CAPS.
-* All STR variables should have an lowercase "s" in front of the variable name (ex. "svariable").
+* All STR variables should have an lowercase "str_" in front of the variable name (ex. "str_var").
 * Do not put new lines between your code, it may cause unwanted behavior.

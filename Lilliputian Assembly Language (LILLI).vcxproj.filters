@@ -38,9 +38,6 @@
     <ClInclude Include="variable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="str.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

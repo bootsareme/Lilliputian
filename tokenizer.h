@@ -2,18 +2,22 @@
 
 #include <fstream>
 #include <thread>
-#include <string>
-#include <vector>
 #include <chrono>
 
 #include "opcode.h"
 #include "variable.h"
-#include "str.h"
+
+typedef struct
+{
+	std::string opcode;
+	std::string operand1;
+	std::string modifier;
+	std::string operand2;
+} Instruction;
 
 namespace Tokenizer 
 {
-	void parse(std::ifstream& src);
 	std::vector<std::string> split(const std::string& str, const std::string& delim);
-	void link(std::vector<std::string> instruction, std::vector<std::string> arg1,
-		std::vector<std::string> modifier, std::vector<std::string> arg2);
+	void parse(std::ifstream& src);
+	void analyze(std::vector<Instruction> instructions);
 }

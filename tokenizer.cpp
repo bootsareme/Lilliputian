@@ -22,111 +22,101 @@ std::vector<std::string> Tokenizer::split(const std::string& str, const std::str
 
 void Tokenizer::parse(std::ifstream& src) 
 {
+	std::vector<Instruction> instructions;
 	std::vector<std::string> opcodes;
 	std::vector<std::string> arg1, arg2;
-	std::vector<std::string> operand;
+	std::vector<std::string> modifier;
 	
-	for (std::string instruction; std::getline(src, instruction);)
+	for (std::string line; std::getline(src, line);)
 	{
-		std::string pos1 = instruction.substr(0, instruction.find(' '));
-		std::vector<std::string> token = split(instruction, " ");
+		//std::string pos1 = line.substr(0, line.find(' '));
+		std::vector<std::string> token = Tokenizer::split(line, " ");
 
-		if (token.size() > 1 && token.size() > 2 && token.size() > 3) {
-			opcodes.emplace_back(pos1);
-			arg1.emplace_back(token[1]);
-			arg2.emplace_back(token[3]);
-			operand.emplace_back(token[2]);
-		} else if (token.size() > 1 && token.size() > 2) {
-			opcodes.emplace_back(pos1);
-			arg1.emplace_back(token[1]);
-			arg2.emplace_back("`");
-			operand.emplace_back(token[2]);
-		} else if (token.size() > 1) {
-			opcodes.emplace_back(pos1);
-			arg1.emplace_back(token[1]);
-			arg2.emplace_back("`");
-			operand.emplace_back("`");
-		} else {
-			opcodes.emplace_back(pos1);
-			arg1.emplace_back("`");
-			arg2.emplace_back("`");
-			operand.emplace_back("`");
-		}
+		if (token.size() > 3)
+			instructions.emplace_back(Instruction{ token[0], token[1], token[2], token[3] });
+		else if (token.size() > 2)
+			instructions.emplace_back(Instruction{ token[0], token[1], token[2], "`" });
+		else if (token.size() > 1)
+			instructions.emplace_back(Instruction{ token[0], token[1], "`", "`" });
+		else
+			instructions.emplace_back(Instruction{ token[0], "`", "`", "`" });
 	}
-	link(opcodes, arg1, operand, arg2);
+
+	Tokenizer::analyze(instructions);
 }
 
-void Tokenizer::link(std::vector<std::string> instruction, std::vector<std::string> arg1,
-	std::vector<std::string> modifier, std::vector<std::string> arg2)
+void Tokenizer::analyze(std::vector<Instruction> instructions)
 {	
 	size_t lines;
 
-	for (long long i = 0; i < instruction.size(); i++) {
-		if (instruction[i] == "SET")
-			Opcode::set(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "MOV")
-			Opcode::move(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "ARITH")
-			Opcode::add(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "STR")
-			Opcode::str(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "PRINT")
-			Opcode::print(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "DEL")
-			Opcode::del(arg1[i]);
-		else if (instruction[i] == "INT")
-			std::this_thread::sleep_for(std::chrono::milliseconds(std::stoll(arg1[i])));
-		else if (instruction[i] == "CHECK") {
-			if (Opcode::conditional(arg1[i], modifier[i]) != NULL) {
-				lines = i + Opcode::conditional(arg1[i], modifier[i]);
-				goto _thread;
+	for (size_t i = 0; i < instructions.size(); i++)
+	{
+		if (instructions[i].opcode == "SET")
+			Opcode::set(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "MOV")
+			Opcode::move(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "ARITH")
+			Opcode::arithmetic(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "STR")
+			Opcode::str(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "DEL")
+			Opcode::del(instructions[i].operand1);
+		else if (instructions[i].opcode == "INT")
+			std::this_thread::sleep_for(std::chrono::milliseconds(std::stoll(instructions[i].operand1)));
+		else if (instructions[i].opcode == "CHECK") {
+			if (Opcode::conditional(instructions[i].operand1, instructions[i].modifier) != NULL)
+			{
+				lines = i + Opcode::conditional(instructions[i].operand1, instructions[i].modifier);
+				goto _dst_;
 			}
 		}
-		else if (instruction[i] == "JMP") {
+		else if (instructions[i].opcode == "JMP")
+		{
 			try
 			{
-				lines = std::stoll(arg1[i]);
+				lines = std::stoll(instructions[i].operand1);
 			}
 			catch (std::invalid_argument& _)
 			{
-				lines = Opcode::index(arg1[i]);
+				lines = Opcode::index(instructions[i].operand1);
 			}
-			goto _thread;
+			goto _dst_;
 		}
 	}
 	return;
 
-_thread:
-	for (long long i = lines - 1; i < instruction.size(); i++) {
-		if (instruction[i] == "SET")
-			Opcode::set(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "MOV")
-			Opcode::move(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "ARITH")
-			Opcode::add(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "STR")
-			Opcode::str(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "PRINT")
-			Opcode::print(arg1[i], modifier[i], arg2[i]);
-		else if (instruction[i] == "DEL")
-			Opcode::del(arg1[i]);
-		else if (instruction[i] == "INT")
-			std::this_thread::sleep_for(std::chrono::milliseconds(std::stoll(arg1[i])));
-		else if (instruction[i] == "CHECK") {
-			if (Opcode::conditional(arg1[i], modifier[i]) != NULL) {
-				lines = i + Opcode::conditional(arg1[i], modifier[i]);
-				goto _thread;
+_dst_:
+	for (size_t i = lines - 1; i < instructions.size(); i++)
+	{
+		if (instructions[i].opcode == "SET")
+			Opcode::set(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "MOV")
+			Opcode::move(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "ARITH")
+			Opcode::arithmetic(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "STR")
+			Opcode::str(instructions[i].operand1, instructions[i].modifier, instructions[i].operand2);
+		else if (instructions[i].opcode == "DEL")
+			Opcode::del(instructions[i].operand1);
+		else if (instructions[i].opcode == "INT")
+			std::this_thread::sleep_for(std::chrono::milliseconds(std::stoll(instructions[i].operand1)));
+		else if (instructions[i].opcode == "CHECK") {
+			if (Opcode::conditional(instructions[i].operand1, instructions[i].modifier) != NULL)
+			{
+				lines = i + Opcode::conditional(instructions[i].operand1, instructions[i].modifier);
+				goto _dst_;
 			}
-		} else if (instruction[i] == "JMP") {
+		} else if (instructions[i].opcode == "JMP")
+		{
 			try
 			{
-				lines = std::stoll(arg1[i]);
+				lines = std::stoll(instructions[i].operand1);
 			}
 			catch (std::invalid_argument& _)
 			{
-				lines = Opcode::index(arg1[i]);
+				lines = Opcode::index(instructions[i].operand1);
 			}
-			goto _thread;
+			goto _dst_;
 		}
 	}
 }

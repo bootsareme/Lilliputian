@@ -1,40 +1,19 @@
 #include "opcode.h"
 
-std::map<std::string, Variable> varMap;
-std::map<std::string, STR> str_varMap;
+std::map<std::string, Variable> scope;
 
 long long Opcode::index(const std::string& var_name)
 {
-	return varMap[var_name].getValue();
-}
-
-std::vector<std::string> split(const std::string& str, const std::string& delim)
-{
-	std::vector<std::string> tokens;
-	size_t prev = 0, pos;
-
-	do
-	{
-		pos = str.find(delim, prev);
-		if (pos == std::string::npos)
-			pos = str.length();
-		std::string token = str.substr(prev, pos - prev);
-		if (!token.empty())
-			tokens.push_back(token);
-		prev = pos + delim.length();
-	}
-	while (pos < str.length() && prev < str.length());
-
-	return tokens;
+	return scope[var_name].getValue();
 }
 
 void Opcode::set(std::string operand1, const std::string& modifier, const std::string& operand2)
 {
-	if (modifier != "=")
+	if (modifier != ":=")
 		return;
 
-	Variable var = Variable(std::move(operand1), std::stoll(operand2));
-	varMap.insert({ var.getName(), var });
+	Variable var = Variable(operand1, std::stoll(operand2));
+	scope.insert({ var.getName(), var });
 }
 
 void Opcode::move(const std::string& operand1, const std::string& modifier, const std::string& operand2)
@@ -42,44 +21,71 @@ void Opcode::move(const std::string& operand1, const std::string& modifier, cons
 	if (modifier != "->")
 		return;
 
-	if (operand2 == "STDOUT") {
-		const Variable var = varMap[operand1];
-		std::cout << var.getValue() << '\n';
-	}
+	if (operand1 == "STDIN")
+	{
+		std::string input;
+		std::getline(std::cin, input);
 
-	const Variable var = varMap[operand1];
-	varMap[operand2].setValue(var.getValue());
+		try
+		{
+			scope[operand2].setValue(std::stoll(input));
+		}
+		catch (const std::invalid_argument& _)
+		{
+			std::vector<char> characters(input.begin(), input.end());
+			for (const char c : input)
+				characters.emplace_back(c);
+			scope[operand2].setStrValue(characters);
+		}
+	}
+	else if (operand2 == "STDOUT")
+	{
+		const Variable var = scope[operand1];
+		if (!var.getStrValue().empty())
+			std::cout << var.getStrValue() << '\n';
+		else
+			std::cout << var.getValue() << '\n';
+	}
+	else
+	{
+		const Variable var = scope[operand1];
+		scope[operand2].setValue(var.getValue());
+	}
 }
 
-void Opcode::add(const std::string& operand1, const std::string& modifier, const std::string& operand2)
+void Opcode::arithmetic(const std::string& operand1, const std::string& modifier, const std::string& operand2)
 {
-	if (modifier == "+") {
-		const Variable var1 = varMap[operand1];
-		Variable var2 = varMap[operand2];
+	if (modifier == "+")
+	{
+		const Variable var1 = scope[operand1];
+		Variable var2 = scope[operand2];
 		var2.setValue(var1.getValue() + var2.getValue());
-		varMap.erase(var2.getName());
-		varMap.insert({ var2.getName(), var2 });
+		scope.erase(var2.getName());
+		scope.insert({ var2.getName(), var2 });
 	}
-	else if (modifier == "-") {
-		const Variable var1 = varMap[operand1];
-		Variable var2 = varMap[operand2];
+	else if (modifier == "-")
+	{
+		const Variable var1 = scope[operand1];
+		Variable var2 = scope[operand2];
 		var2.setValue(var1.getValue() - var2.getValue());
-		varMap.erase(var2.getName());
-		varMap.insert({ var2.getName(), var2 });
+		scope.erase(var2.getName());
+		scope.insert({ var2.getName(), var2 });
 	}
-	else if (modifier == "*") {
-		const Variable var1 = varMap[operand1];
-		Variable var2 = varMap[operand2];
+	else if (modifier == "*")
+	{
+		const Variable var1 = scope[operand1];
+		Variable var2 = scope[operand2];
 		var2.setValue(var1.getValue() * var2.getValue());
-		varMap.erase(var2.getName());
-		varMap.insert({ var2.getName(), var2 });
+		scope.erase(var2.getName());
+		scope.insert({ var2.getName(), var2 });
 	}
-	else if (modifier == "/") {
-		const Variable var1 = varMap[operand1];
-		Variable var2 = varMap[operand2];
+	else if (modifier == "/")
+	{
+		const Variable var1 = scope[operand1];
+		Variable var2 = scope[operand2];
 		var2.setValue(var1.getValue() / var2.getValue());
-		varMap.erase(var2.getName());
-		varMap.insert({ var2.getName(), var2 });
+		scope.erase(var2.getName());
+		scope.insert({ var2.getName(), var2 });
 	}
 }
 
@@ -88,65 +94,54 @@ void Opcode::str(std::string operand1, const std::string& modifier, const std::s
 	if (modifier != "=")
 		return;
 
-	const std::vector<std::string> chars = split(operand2, ",");
+	const std::vector<std::string> chars = Tokenizer::split(operand2, ",");
 	std::vector<char> export_e;
-	STR newString = STR(std::move(operand1), "");
-	str_varMap.insert({ newString.getName(), newString });
+	Variable newString = Variable(std::move(operand1), "");
+	scope.insert({ newString.getName(), newString });
 
-	for (const auto& i : chars) {
-		Variable var = varMap[i];
+	for (const auto& i : chars)
+	{
+		Variable var = scope[i];
 		char j = static_cast<char>(var.getValue());
 		export_e.push_back(j);
 	}
 
-	newString.setValue(export_e);
-	str_varMap.erase(newString.getName());
-	str_varMap.insert({ newString.getName(), newString });
-}
-
-void Opcode::print(const std::string& operand1, const std::string& modifier, const std::string& operand2)
-{
-	if (modifier != "->")
-		return;
-
-	if (operand2 == "STDOUT") {
-		const STR var = str_varMap[operand1];
-		std::cout << var.getValue() << '\n';
-	}
-	else {
-		const STR var = str_varMap[operand1];
-		std::ofstream output(operand2);
-		output << var.getValue() << '\n';
-		output.close();
-	}
+	newString.setStrValue(export_e);
+	scope.erase(newString.getName());
+	scope.insert({ newString.getName(), newString });
 }
 
 long long Opcode::conditional(const std::string& operand1, const std::string& modifier)
 {
-	const std::vector<std::string> statement = split(modifier, "=");
-	const Variable var1 = varMap[std::string(1, statement[0].at(0))];
-	const Variable var2 = varMap[statement[1]];
+	const std::vector<std::string> statement = Tokenizer::split(modifier, "=");
+	const Variable var1 = scope[std::string(1, statement[0].at(0))];
+	const Variable var2 = scope[statement[1]];
 
-	try {
-		if (std::string(1, statement[0].at(1)) == "!") {
+	try
+	{
+		if (std::string(1, statement[0].at(1)) == "!")
+		{
 			if (var1.getValue() != var2.getValue())
 				return NULL;
 			return std::stoll(operand1) + 1;
 		}
 
-		if (std::string(1, statement[0].at(1)) == "<") {
+		if (std::string(1, statement[0].at(1)) == "<")
+		{
 			if (var1.getValue() <= var2.getValue())
 				return NULL;
 			return std::stoll(operand1) + 1;
 		}
 
-		if (std::string(1, statement[0].at(1)) == ">") {
+		if (std::string(1, statement[0].at(1)) == ">")
+		{
 			if (var1.getValue() >= var2.getValue())
 				return NULL;
 			return std::stoll(operand1) + 1;
 		}
 	}
-	catch (std::out_of_range& _) {
+	catch (std::out_of_range& _)
+	{
 		if (var1.getValue() == var2.getValue())
 			return NULL;
 		return std::stoll(operand1) + 1;
@@ -155,10 +150,8 @@ long long Opcode::conditional(const std::string& operand1, const std::string& mo
 	return NULL;
 }
 
-void Opcode::del(const std::string& operand1)
+void Opcode::del(const std::string& operand)
 {
-	const STR str = str_varMap[operand1];
-	const Variable var = varMap[operand1];
-	str_varMap.erase(str.getName());
-	varMap.erase(var.getName());
+	const Variable var = scope[operand];
+	scope.erase(var.getName());
 }
